@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Madhvendra Singh — .NET &amp; Python Developer / CAD-BIM Automation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0a1420; --panel:#0d1b2b; --panel-2:#0f2136; --cyan:#5fd3e8; --cyan-dim:#3b8fa3;
+    --brass:#cf9a5c; --paper:#e9f2f5; --slate:#7e93a6; --slate-dim:#4d6577; --line:#1e3a52;
+    --grid: rgba(95,211,232,0.055); --danger-red:#c96a5c;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{ background:var(--ink); color:var(--paper); font-family:'Inter',sans-serif; min-height:100vh; overflow-x:hidden; position:relative; }
+  body::before{
+    content:""; position:fixed; inset:0;
+    background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 44px 44px; pointer-events:none; z-index:0;
+  }
+  body::after{
+    content:""; position:fixed; inset:0;
+    background:radial-gradient(ellipse at 20% 0%, rgba(95,211,232,0.06), transparent 55%),
+               radial-gradient(ellipse at 100% 100%, rgba(207,154,92,0.05), transparent 50%);
+    pointer-events:none; z-index:0;
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .display{font-family:'Space Grotesk',sans-serif;}
+  a{color:inherit; text-decoration:none;}
+
+  .crosshair{ position:absolute; width:18px; height:18px; pointer-events:none; opacity:.55; }
+  .crosshair::before,.crosshair::after{ content:""; position:absolute; background:var(--cyan-dim); }
+  .crosshair::before{ width:100%; height:1px; top:50%; left:0; }
+  .crosshair::after{ width:1px; height:100%; left:50%; top:0; }
+  .crosshair.tl{top:10px; left:10px;} .crosshair.tr{top:10px; right:10px;}
+  .crosshair.bl{bottom:10px; left:10px;} .crosshair.br{bottom:10px; right:10px;}
+
+  header{ position:sticky; top:0; z-index:50; background:rgba(10,20,32,0.86); backdrop-filter:blur(10px); border-bottom:1px solid var(--line); }
+  .nav-wrap{ max-width:1180px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; padding:16px 28px; }
+  .brandmark{ display:flex; align-items:center; gap:10px; }
+  .brandmark .box{ width:34px; height:34px; border:1px solid var(--cyan-dim); display:flex; align-items:center; justify-content:center; font-size:11px; letter-spacing:.5px; color:var(--cyan); }
+  .brandmark .name{ font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:15px; letter-spacing:.3px; }
+  .brandmark .sub{ font-size:10px; color:var(--slate); letter-spacing:1.5px;}
+
+  nav{display:flex; gap:2px;}
+  nav button{
+    background:transparent; border:1px solid transparent; cursor:pointer; color:var(--slate);
+    font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:1px; padding:9px 14px;
+    display:flex; flex-direction:column; align-items:center; gap:2px; transition:.2s;
+  }
+  nav button .sht{font-size:9px; opacity:.6;}
+  nav button:hover{color:var(--paper); border-color:var(--line);}
+  nav button.active{ color:var(--cyan); border-color:var(--cyan-dim); background:rgba(95,211,232,0.05);}
+  .nav-toggle{display:none; background:transparent; border:1px solid var(--line); color:var(--paper); padding:8px 10px; cursor:pointer;}
+
+  main{ position:relative; z-index:1; max-width:1180px; margin:0 auto; padding:0 28px 90px; }
+  .page{ display:none; animation:fadein .55s ease; }
+  .page.active{ display:block; }
+  @keyframes fadein{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+
+  .dimline{ display:flex; align-items:center; gap:10px; margin:52px 0 34px; color:var(--slate); font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:1.5px; }
+  .dimline::before, .dimline::after{ content:""; flex:1; height:1px; background:var(--line); position:relative; }
+  .dimline .arrow{ width:6px; height:6px; border-left:1px solid var(--cyan-dim); border-bottom:1px solid var(--cyan-dim); transform:rotate(45deg); }
+
+  .title-block{ border:1px solid var(--line); margin-top:60px; display:grid; grid-template-columns:1fr 1fr 1fr 1fr; font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--slate); }
+  .title-block div{ padding:10px 14px; border-right:1px solid var(--line); }
+  .title-block div:last-child{ border-right:none; }
+  .title-block b{ display:block; color:var(--paper); font-size:11px; margin-top:3px; letter-spacing:.5px;}
+
+  /* HOME */
+  .hero{ position:relative; padding:90px 0 30px; border-bottom:1px solid var(--line); }
+  .eyebrow{ font-family:'JetBrains Mono',monospace; color:var(--brass); font-size:12px; letter-spacing:3px; display:flex; align-items:center; gap:10px; margin-bottom:22px; }
+  .eyebrow::before{ content:""; width:26px; height:1px; background:var(--brass); }
+  h1.hero-title{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(40px, 7vw, 84px); line-height:0.98; letter-spacing:-1px; color:var(--paper); }
+  h1.hero-title span{ color:var(--cyan); }
+  .hero-role{ font-family:'JetBrains Mono',monospace; font-size:15px; color:var(--slate); margin-top:20px; letter-spacing:1px; }
+  .hero-desc{ max-width:640px; margin-top:26px; color:var(--slate); font-size:16px; line-height:1.7; }
+  .hero-actions{ display:flex; gap:14px; margin-top:38px; flex-wrap:wrap; }
+  .btn{ font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:1px; padding:13px 22px; border:1px solid var(--cyan-dim); color:var(--cyan); cursor:pointer; background:transparent; transition:.2s; display:inline-flex; align-items:center; gap:8px; }
+  .btn:hover{ background:var(--cyan); color:var(--ink); }
+  .btn.solid{ background:var(--brass); border-color:var(--brass); color:var(--ink); }
+  .btn.solid:hover{ background:transparent; color:var(--brass); }
+
+  .stat-row{ display:grid; grid-template-columns:repeat(3,1fr); margin-top:64px; border-top:1px solid var(--line); }
+  .stat{ padding:22px 6px 4px; border-right:1px solid var(--line); position:relative; }
+  .stat:last-child{ border-right:none; }
+  .stat .n{ font-family:'Space Grotesk',sans-serif; font-size:34px; font-weight:600; color:var(--paper); }
+  .stat .l{ font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--slate); letter-spacing:1.5px; margin-top:6px; }
+  .platform-strip{ display:flex; gap:30px; flex-wrap:wrap; margin-top:16px; padding-top:16px; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--slate-dim); letter-spacing:1px; }
+
+  /* ABOUT */
+  .section-h{ font-family:'Space Grotesk',sans-serif; font-size:30px; font-weight:600; margin-bottom:10px;}
+  .section-tag{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--cyan-dim); letter-spacing:2px; margin-bottom:6px;}
+  .lede{ color:var(--slate); font-size:15.5px; line-height:1.8; max-width:720px; }
+
+  .edu-sheet{ margin-top:40px; border:1px solid var(--line); padding:28px; position:relative; background:rgba(95,211,232,0.02); }
+  .edu-sheet h3{ font-family:'Space Grotesk',sans-serif; font-size:20px; }
+  .edu-sheet .inst{ color:var(--cyan); font-family:'JetBrains Mono',monospace; font-size:12px; margin-top:6px;}
+  .edu-meta{ display:flex; gap:36px; margin-top:18px; flex-wrap:wrap; }
+  .edu-meta div span{ display:block; font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--slate); letter-spacing:1.5px; }
+  .edu-meta div b{ font-size:17px; font-weight:600; color:var(--paper); }
+
+  .legend{ margin-top:20px; border:1px solid var(--line); }
+  .legend-row{ display:grid; grid-template-columns:180px 1fr; border-top:1px solid var(--line); }
+  .legend-row:first-child{ border-top:none; }
+  .legend-key{ padding:16px 18px; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--brass); letter-spacing:1px; border-right:1px solid var(--line); display:flex; align-items:center; }
+  .legend-val{ padding:16px 18px; color:var(--paper); font-size:14px; line-height:1.7; }
+  .chip{ display:inline-block; border:1px solid var(--line); color:var(--slate); font-family:'JetBrains Mono',monospace; font-size:11px; padding:4px 10px; margin:3px 6px 3px 0; letter-spacing:.5px; }
+
+  /* EXPERIENCE */
+  .job{ margin-top:36px; border-left:2px solid var(--cyan-dim); padding-left:26px; position:relative; }
+  .job::before{ content:""; position:absolute; left:-6px; top:6px; width:10px; height:10px; background:var(--ink); border:2px solid var(--cyan); transform:rotate(45deg); }
+  .job-head{ display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; align-items:baseline;}
+  .job-title{ font-family:'Space Grotesk',sans-serif; font-size:22px; font-weight:600; }
+  .job-date{ font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--brass); letter-spacing:1px;}
+  .job-org{ color:var(--slate); font-family:'JetBrains Mono',monospace; font-size:13px; margin-top:4px;}
+  .job ul{ margin-top:20px; list-style:none; }
+  .job li{ position:relative; padding-left:22px; margin-bottom:16px; color:var(--slate); font-size:14.5px; line-height:1.7; }
+  .job li::before{ content:"—"; position:absolute; left:0; color:var(--cyan-dim); }
+
+  .extra{ margin-top:60px; border:1px solid var(--line); padding:26px 28px; }
+  .extra h4{ font-family:'JetBrains Mono',monospace; color:var(--cyan-dim); font-size:12px; letter-spacing:2px; margin-bottom:14px;}
+  .extra li{ color:var(--slate); font-size:14px; line-height:1.8; padding-left:18px; position:relative; list-style:none;}
+  .extra li::before{ content:"·"; position:absolute; left:0; color:var(--brass); }
+
+  /* PROJECTS */
+  .proj-grid{ display:grid; grid-template-columns:1fr; gap:22px; margin-top:36px; }
+  .proj-card{ border:1px solid var(--line); padding:0; position:relative; transition:.25s; overflow:hidden; }
+  .proj-card:hover{ border-color:var(--cyan-dim); background:rgba(95,211,232,0.02); }
+  .proj-top{ display:flex; justify-content:space-between; align-items:center; padding:16px 22px; border-bottom:1px solid var(--line);}
+  .proj-sheet{ font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--slate); letter-spacing:2px;}
+  .proj-rev{ font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--brass); letter-spacing:1px;}
+  .proj-body{ padding:24px 22px 26px; }
+  .proj-body h3{ font-family:'Space Grotesk',sans-serif; font-size:21px; font-weight:600; }
+  .proj-body p{ color:var(--slate); font-size:14.5px; line-height:1.75; margin-top:12px; max-width:760px;}
+  .proj-tags{ margin-top:16px; }
+
+  /* CONTACT */
+  .contact-grid{ display:grid; grid-template-columns:1.1fr 0.9fr; gap:50px; margin-top:40px; }
+  .contact-list{ display:flex; flex-direction:column; gap:0; }
+  .contact-item{ display:flex; justify-content:space-between; align-items:center; padding:20px 0; border-top:1px solid var(--line); }
+  .contact-list .contact-item:last-child{ border-bottom:1px solid var(--line); }
+  .contact-item .k{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--slate); letter-spacing:2px;}
+  .contact-item .v{ font-family:'Space Grotesk',sans-serif; font-size:17px; color:var(--paper);}
+  .contact-item a.v:hover{ color:var(--cyan); }
+
+  .compass{ border:1px solid var(--line); padding:30px; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; gap:16px; background:rgba(95,211,232,0.02); }
+  .compass .ring{ width:120px; height:120px; border-radius:50%; border:1px solid var(--cyan-dim); display:flex; align-items:center; justify-content:center; position:relative; }
+  .compass .ring::before{ content:""; position:absolute; width:1px; height:100%; background:var(--line); }
+  .compass .ring::after{ content:""; position:absolute; width:100%; height:1px; background:var(--line); }
+  .compass .ring span{ font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--brass); background:var(--ink); padding:2px 6px; z-index:1;}
+  .compass p{ color:var(--slate); font-size:13px; line-height:1.7; max-width:260px; }
+
+  footer{ border-top:1px solid var(--line); margin-top:80px; padding:22px 28px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--slate-dim); letter-spacing:1px; max-width:1180px; margin-left:auto; margin-right:auto; }
+
+  @media (max-width: 760px){
+    .nav-wrap{ padding:14px 18px; }
+    nav{ display:none; flex-direction:column; position:absolute; top:100%; left:0; right:0; background:var(--panel); border-bottom:1px solid var(--line); }
+    nav.open{ display:flex; }
+    nav button{ align-items:flex-start; padding:14px 20px; border-bottom:1px solid var(--line); flex-direction:row; gap:10px;}
+    .nav-toggle{ display:block; }
+    main{ padding:0 18px 70px; }
+    .stat-row{ grid-template-columns:1fr; }
+    .stat{ border-right:none; border-top:1px solid var(--line); }
+    .title-block{ grid-template-columns:1fr 1fr; }
+    .contact-grid{ grid-template-columns:1fr; }
+    .legend-row{ grid-template-columns:1fr; }
+    .legend-key{ border-right:none; border-bottom:1px solid var(--line); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav-wrap">
+    <div class="brandmark">
+      <div class="box mono">MS</div>
+      <div>
+        <div class="name">Madhvendra Singh</div>
+        <div class="sub mono">DRAWING&nbsp;SET&nbsp;/&nbsp;PORTFOLIO</div>
+      </div>
+    </div>
+    <button class="nav-toggle mono" id="navToggle">MENU ▾</button>
+    <nav id="mainNav">
+      <button data-page="home" class="active"><span>HOME</span><span class="sht">SHT 01/05</span></button>
+      <button data-page="about"><span>ABOUT</span><span class="sht">SHT 02/05</span></button>
+      <button data-page="experience"><span>EXPERIENCE</span><span class="sht">SHT 03/05</span></button>
+      <button data-page="projects"><span>PROJECTS</span><span class="sht">SHT 04/05</span></button>
+      <button data-page="contact"><span>CONTACT</span><span class="sht">SHT 05/05</span></button>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <!-- ================= HOME ================= -->
+  <section class="page active" id="page-home">
+    <div class="hero">
+      <div class="crosshair tl"></div><div class="crosshair tr"></div>
+      <div class="eyebrow">SHEET 01 — GENERAL ARRANGEMENT</div>
+      <h1 class="hero-title">MADHVENDRA<br>SINGH<span>.</span></h1>
+      <div class="hero-role">.NET &amp; PYTHON DEVELOPER — CAD / BIM AUTOMATION ENGINEER</div>
+      <p class="hero-desc">I build the tools engineers use to stop drawing the same thing twice — DLLs, forms, APIs and automation layers for Hexagon S3D, Revit and Plant 3D that turn repetitive modelling into a single click. 1.5 years deep in C#, .NET and Python, working on the plant-design workflows of oil &amp; gas and infrastructure projects.</p>
+      <div class="hero-actions">
+        <button class="btn solid" data-goto="experience">VIEW EXPERIENCE →</button>
+        <button class="btn" data-goto="contact">GET IN TOUCH</button>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat"><div class="n">1.5+</div><div class="l">YEARS IN PRODUCTION</div></div>
+        <div class="stat"><div class="n">04</div><div class="l">MAJOR CLIENT PROJECTS</div></div>
+        <div class="stat"><div class="n">8.3</div><div class="l">CGPA — B.TECH CSE</div></div>
+      </div>
+      <div class="platform-strip mono">
+        <span>HEXAGON S3D</span><span>REVIT 3D</span><span>PLANT 3D</span><span>C# / .NET</span><span>ASP.NET CORE</span><span>PYTHON</span><span>FASTAPI</span><span>SQL</span>
+      </div>
+    </div>
+
+    <div class="title-block">
+      <div>DRAWING<b>PORTFOLIO — MS</b></div>
+      <div>SCALE<b>1 : 1</b></div>
+      <div>DATE<b id="tbDate">—</b></div>
+      <div>SHEET<b>01 OF 05</b></div>
+    </div>
+  </section>
+
+  <!-- ================= ABOUT ================= -->
+  <section class="page" id="page-about">
+    <div class="section-tag">SHEET 02 — SPECIFICATION &amp; NOTES</div>
+    <h2 class="section-h">About</h2>
+    <p class="lede">DotNET Developer with 1.5 years of experience in software development, specialising in C#, .NET, Python, DLL development, 3D software customisation, workflow automation and API integration. I build automation solutions, data extraction and conversion tools, and custom applications for Revit, AutoCAD and Hexagon — made to improve productivity, accuracy and engineering workflow across every project I touch.</p>
+
+    <div class="dimline"><span class="arrow"></span>EDUCATION<span class="arrow" style="transform:rotate(225deg);"></span></div>
+    <div class="edu-sheet">
+      <div class="crosshair tl"></div><div class="crosshair br"></div>
+      <h3>Bachelor of Computer Science</h3>
+      <div class="inst">AKTU UNIVERSITY</div>
+      <div class="edu-meta">
+        <div><span>COMPLETED</span><b>Aug 2024</b></div>
+        <div><span>CGPA</span><b>8.3 / 10</b></div>
+        <div><span>DISCIPLINE</span><b>Computer Science</b></div>
+      </div>
+    </div>
+
+    <div class="dimline"><span class="arrow"></span>SKILLS LEGEND<span class="arrow" style="transform:rotate(225deg);"></span></div>
+    <div class="legend">
+      <div class="legend-row">
+        <div class="legend-key">LANGUAGES</div>
+        <div class="legend-val">
+          <span class="chip">C#</span><span class="chip">Python</span><span class="chip">SQL</span><span class="chip">JavaScript</span><span class="chip">HTML / CSS</span>
+        </div>
+      </div>
+      <div class="legend-row">
+        <div class="legend-key">.NET</div>
+        <div class="legend-val">
+          <span class="chip">.NET Framework</span><span class="chip">ASP.NET Core Web API</span><span class="chip">Razor Pages / MVC</span><span class="chip">Entity Framework Core</span><span class="chip">LINQ</span><span class="chip">DLL Development</span><span class="chip">Windows Forms</span><span class="chip">xUnit</span>
+        </div>
+      </div>
+      <div class="legend-row">
+        <div class="legend-key">PYTHON</div>
+        <div class="legend-val">
+          <span class="chip">FastAPI</span><span class="chip">pandas</span><span class="chip">openpyxl</span><span class="chip">SQLAlchemy</span><span class="chip">requests</span><span class="chip">pytest</span><span class="chip">Scripting &amp; Automation</span><span class="chip">XML / JSON / CSV / Excel</span>
+        </div>
+      </div>
+      <div class="legend-row">
+        <div class="legend-key">BACKEND &amp; DATA</div>
+        <div class="legend-val">
+          <span class="chip">REST APIs</span><span class="chip">JWT Authentication</span><span class="chip">SQL Server</span><span class="chip">PostgreSQL</span><span class="chip">SQLite</span><span class="chip">Docker</span><span class="chip">Git / GitHub</span><span class="chip">Swagger / OpenAPI</span>
+        </div>
+      </div>
+      <div class="legend-row">
+        <div class="legend-key">SOFTWARE</div>
+        <div class="legend-val">
+          <span class="chip">Hexagon S3D</span><span class="chip">Revit 3D</span><span class="chip">Plant 3D</span><span class="chip">AutoCAD</span>
+        </div>
+      </div>
+      <div class="legend-row">
+        <div class="legend-key">OTHER</div>
+        <div class="legend-val">
+          <span class="chip">Software Customisation</span><span class="chip">Workflow Automation</span><span class="chip">API Integration</span><span class="chip">Data Extraction &amp; Conversion</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="title-block">
+      <div>DRAWING<b>ABOUT — MS</b></div>
+      <div>SCALE<b>1 : 1</b></div>
+      <div>DATE<b class="tbDate2">—</b></div>
+      <div>SHEET<b>02 OF 05</b></div>
+    </div>
+  </section>
+
+  <!-- ================= EXPERIENCE ================= -->
+  <section class="page" id="page-experience">
+    <div class="section-tag">SHEET 03 — WORK HISTORY</div>
+    <h2 class="section-h">Experience</h2>
+
+    <div class="job">
+      <div class="job-head">
+        <div class="job-title">.NET Developer</div>
+        <div class="job-date">JAN 2025 — PRESENT</div>
+      </div>
+      <div class="job-org">HALEFORM TECHNOLOGY SOLUTIONS · LUCKNOW, UP</div>
+      <ul>
+        <li>Worked on Hexagon 3D customisation for primary and secondary supports beyond the default library, handling complex arrangements and developing solutions for VG, CRPO and ENI projects, while keeping delivery on time for LTTS, Lamprell, ENI and Adani.</li>
+        <li>Designed DLLs and user-friendly forms to automate modelling of equipment, grids, slabs, walls, steel structures and other components — cutting repetitive manual work, improving modelling accuracy, standardising workflows and lifting overall design productivity.</li>
+        <li>Built catalog automation software using Razor Pages end to end — front end, back end and database connectivity — automating catalog sheet generation from user input to reduce manual effort and improve data accuracy.</li>
+        <li>Wrote Python scripts to automate data processing, file conversion and validation tasks around engineering models and project sheets, reducing repetitive manual effort and keeping data consistent across tools.</li>
+      </ul>
+    </div>
+
+    <div class="title-block">
+      <div>DRAWING<b>EXPERIENCE — MS</b></div>
+      <div>SCALE<b>1 : 1</b></div>
+      <div>DATE<b class="tbDate2">—</b></div>
+      <div>SHEET<b>03 OF 05</b></div>
+    </div>
+  </section>
+
+  <!-- ================= PROJECTS ================= -->
+  <section class="page" id="page-projects">
+    <div class="section-tag">SHEET 04 — PROJECT INDEX</div>
+    <h2 class="section-h">Projects</h2>
+    <p class="lede">Client-grade CAD/BIM automation alongside .NET and Python backend work — each project built to remove a repetitive step from an engineer's day.</p>
+
+    <div class="proj-grid">
+      <div class="proj-card">
+        <div class="proj-top"><span class="proj-sheet mono">P-01 · VG / CRPO / ENI</span><span class="proj-rev mono">REV A</span></div>
+        <div class="proj-body">
+          <h3>Custom Support Design Library</h3>
+          <p>Developed DLLs for primary and secondary support design for LTTS, Lamprell, Adani and NEL, enabling complex support arrangements beyond Hexagon's default library. Built customisable, attribute-based bulk-load sheets so users can adjust support configurations to project-specific requirements without touching code.</p>
+          <div class="proj-tags"><span class="chip">Hexagon S3D</span><span class="chip">C# / DLL</span><span class="chip">Bulk-load Sheets</span></div>
+        </div>
+      </div>
+
+      <div class="proj-card">
+        <div class="proj-top"><span class="proj-sheet mono">P-02 · CONVERSION</span><span class="proj-rev mono">REV A</span></div>
+        <div class="proj-body">
+          <h3>Cross-Platform Data Extraction</h3>
+          <p>Built libraries to extract equipment and model data straight out of Revit 3D and Plant 3D, converting and exporting it into the formats teams actually need — XML, JSON, Excel and more — closing the gap between two CAD ecosystems that don't talk to each other by default.</p>
+          <div class="proj-tags"><span class="chip">Revit 3D</span><span class="chip">Plant 3D</span><span class="chip">XML / JSON / Excel</span></div>
+        </div>
+      </div>
+
+      <div class="proj-card">
+        <div class="proj-top"><span class="proj-sheet mono">P-03 · AUTOMODELLING</span><span class="proj-rev mono">REV A</span></div>
+        <div class="proj-body">
+          <h3>Component Auto-Modelling Suite</h3>
+          <p>Designed class-based libraries to automate modelling of equipment, slabs, structural members, stairs, ladders and grids — improving modelling efficiency, consistency and accuracy while cutting out the repetitive manual design tasks that used to eat up the day.</p>
+          <div class="proj-tags"><span class="chip">C# Class Libraries</span><span class="chip">Structural Automation</span></div>
+        </div>
+      </div>
+
+      <div class="proj-card">
+        <div class="proj-top"><span class="proj-sheet mono">P-04 · .NET API</span><span class="proj-rev mono">REV A</span></div>
+        <div class="proj-body">
+          <h3>Inventory &amp; Order Management REST API</h3>
+          <p>A layered ASP.NET Core Web API with CRUD for products, stock and orders, JWT authentication with role-based authorization, EF Core migrations on SQL Server, input validation, global error handling, pagination and filtering, Swagger documentation and xUnit unit tests.</p>
+          <div class="proj-tags"><span class="chip">C#</span><span class="chip">ASP.NET Core</span><span class="chip">Entity Framework Core</span><span class="chip">SQL Server</span><span class="chip">JWT</span><span class="chip">xUnit</span><span class="chip">Swagger</span></div>
+        </div>
+      </div>
+
+      <div class="proj-card">
+        <div class="proj-top"><span class="proj-sheet mono">P-05 · PYTHON ETL</span><span class="proj-rev mono">REV A</span></div>
+        <div class="proj-body">
+          <h3>Data Pipeline &amp; Reporting Service</h3>
+          <p>An ETL service that ingests CSV, Excel and JSON files, validates and cleans data with pandas, loads it into PostgreSQL and exposes summary reports through a FastAPI REST API. Includes scheduled runs, logging, pytest tests and a Docker setup for one-command deployment.</p>
+          <div class="proj-tags"><span class="chip">Python</span><span class="chip">FastAPI</span><span class="chip">pandas</span><span class="chip">SQLAlchemy</span><span class="chip">PostgreSQL</span><span class="chip">pytest</span><span class="chip">Docker</span></div>
+        </div>
+      </div>
+
+      <div class="proj-card">
+        <div class="proj-top"><span class="proj-sheet mono">P-06 · .NET WEB APP</span><span class="proj-rev mono">REV A</span></div>
+        <div class="proj-body">
+          <h3>Catalog Management Web App</h3>
+          <p>Extended the catalog automation concept into a full ASP.NET Core Razor Pages application with login and roles, searchable catalog records, bulk Excel import with row-level error reporting, and one-click export of generated catalog sheets.</p>
+          <div class="proj-tags"><span class="chip">C#</span><span class="chip">Razor Pages</span><span class="chip">EF Core</span><span class="chip">SQL Server</span><span class="chip">ClosedXML</span></div>
+        </div>
+      </div>
+
+      <div class="proj-card">
+        <div class="proj-top"><span class="proj-sheet mono">P-07 · PYTHON NLP</span><span class="proj-rev mono">REV A</span></div>
+        <div class="proj-body">
+          <h3>Job Match Analyzer</h3>
+          <p>A tool that compares a resume against job descriptions using TF-IDF and cosine similarity, scores the match and lists missing keywords. Includes a Flask web interface and a command-line mode.</p>
+          <div class="proj-tags"><span class="chip">Python</span><span class="chip">scikit-learn</span><span class="chip">Flask</span><span class="chip">pandas</span><span class="chip">pytest</span></div>
+        </div>
+      </div>
+
+      <div class="proj-card">
+        <div class="proj-top"><span class="proj-sheet mono">P-08 · PYTHON AUTOMATION</span><span class="proj-rev mono">REV A</span></div>
+        <div class="proj-body">
+          <h3>Automated Excel Report Generator</h3>
+          <p>A tool that reads raw Excel and CSV data, applies cleaning and business rules with pandas, and produces formatted multi-sheet Excel reports with summaries and charts using openpyxl. Reports can be scheduled and emailed automatically, with a config file to adapt templates without code changes.</p>
+          <div class="proj-tags"><span class="chip">Python</span><span class="chip">pandas</span><span class="chip">openpyxl</span><span class="chip">APScheduler</span><span class="chip">smtplib</span><span class="chip">pytest</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="title-block">
+      <div>DRAWING<b>PROJECTS — MS</b></div>
+      <div>SCALE<b>1 : 1</b></div>
+      <div>DATE<b class="tbDate2">—</b></div>
+      <div>SHEET<b>04 OF 05</b></div>
+    </div>
+  </section>
+
+  <!-- ================= CONTACT ================= -->
+  <section class="page" id="page-contact">
+    <div class="section-tag">SHEET 05 — CONTACT &amp; COORDINATES</div>
+    <h2 class="section-h">Contact</h2>
+    <p class="lede">Open to .NET, Python and automation roles, and CAD-BIM tooling work. The fastest way to reach me is email or LinkedIn.</p>
+
+    <div class="contact-grid">
+      <div class="contact-list">
+        <div class="contact-item"><span class="k">EMAIL</span><a class="v" href="mailto:madhvendrasingh887766@gmail.com">madhvendrasingh887766@gmail.com</a></div>
+        <div class="contact-item"><span class="k">PHONE</span><a class="v" href="tel:+917275152007">+91 72751 52007</a></div>
+        <div class="contact-item"><span class="k">LINKEDIN</span><a class="v" href="https://www.linkedin.com/in/madhvendra-singh/" target="_blank" rel="noopener">linkedin.com/in/madhvendra-singh</a></div>
+        <div class="contact-item"><span class="k">LOCATION</span><span class="v">Lucknow, Uttar Pradesh, India</span></div>
+      </div>
+      <div class="compass">
+        <div class="ring"><span>N</span></div>
+        <p>Based in Lucknow, UP — open to remote and on-site software roles.</p>
+        <a class="btn solid" href="mailto:madhvendrasingh887766@gmail.com">SEND AN EMAIL →</a>
+      </div>
+    </div>
+
+    <div class="title-block">
+      <div>DRAWING<b>CONTACT — MS</b></div>
+      <div>SCALE<b>1 : 1</b></div>
+      <div>DATE<b class="tbDate2">—</b></div>
+      <div>SHEET<b>05 OF 05</b></div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <span>© <span id="yr"></span> MADHVENDRA SINGH — ALL SHEETS DRAWN IN-HOUSE</span>
+  <span>LUCKNOW, UP, IND · REV A</span>
+</footer>
+
+<script>
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}).toUpperCase();
+  document.getElementById('tbDate').textContent = dateStr;
+  document.querySelectorAll('.tbDate2').forEach(el=>el.textContent=dateStr);
+  document.getElementById('yr').textContent = now.getFullYear();
+
+  const pages = document.querySelectorAll('.page');
+  const navButtons = document.querySelectorAll('nav button');
+
+  function showPage(id){
+    pages.forEach(p=>p.classList.remove('active'));
+    navButtons.forEach(b=>b.classList.remove('active'));
+    const target = document.getElementById('page-'+id);
+    const btn = document.querySelector('nav button[data-page="'+id+'"]');
+    if(target){ target.classList.add('active'); }
+    if(btn){ btn.classList.add('active'); }
+    window.scrollTo({top:0, behavior:'smooth'});
+    document.getElementById('mainNav').classList.remove('open');
+    history.replaceState(null,'','#'+id);
+  }
+
+  navButtons.forEach(b=>{ b.addEventListener('click', ()=>showPage(b.dataset.page)); });
+  document.querySelectorAll('[data-goto]').forEach(b=>{ b.addEventListener('click', ()=>showPage(b.dataset.goto)); });
+  document.getElementById('navToggle').addEventListener('click', ()=>{ document.getElementById('mainNav').classList.toggle('open'); });
+
+  const initial = window.location.hash.replace('#','') || 'home';
+  showPage(document.getElementById('page-'+initial) ? initial : 'home');
+</script>
+
+</body>
+</html>
